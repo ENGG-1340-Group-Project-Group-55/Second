@@ -5,94 +5,84 @@
 
 using namespace std;
 
-class Maps
-        {
-    private:
-            int Map_height;
-            int Map_width;
-    public:
-            Maps(int,int);
-            int map_height;
-            int map_width;
-            void Map_Loader();
-            void Map_Printer();
-            char* MapToArray(ifstream&);
-            void Location_accessor();
-        };
+class Maps {
+private:
+    int map_height;
+    int map_width;
+public:
+    Maps(int, int);
+    void Map_Loader();
+    void Map_Printer();
+    char* MapToArray(ifstream&, ifstream&);
+    void Location_accessor();
+};
 
-
-
+/*
 int main(){
     Maps Mp(15,30);
     Mp.Map_Loader();
 }
+*/
 
-Maps::Maps(int a,int b){
-    Map_height = a;
-    Map_width = b;
-    map_height = Map_height;
-    map_width = Map_width;
+Maps::Maps(int a, int b) {
+    map_height = a;
+    map_width = b;
 }
 
 
 void Maps::Map_Loader() {
-    ifstream inputline;
-    string nextline;
-    inputline.open("/Users/lucas/Documents/GitHub/Initial/Map&Objects/Map_resources/15-15_map.txt");
-    if (inputline.fail()){
+    ifstream room_file("/Users/lucas/Documents/GitHub/Initial/Map&Objects/Map_resources/15-15_map.txt");
+    if (room_file.fail()){
         cout<<"파일이 없다잖아 병신아!!!"<<endl;
         exit(1);
     }
-    char hekko = *MapToArray(inputline);
-    cout<<hekko<<endl;
-
+    ifstream object_file("/Users/lucas/Documents/GitHub/Initial/Map&Objects/Object_resources/sofa.txt");
+    if (object_file.fail()){
+        cout<<"파일이 없다잖아 병신아!!!"<<endl;
+        exit(1);
+    }
+    char* hekko = MapToArray(room_file, object_file);
+    cout << hekko << endl;
 }
 
-char* Maps::MapToArray(ifstream& inputline)
+
+char* Maps::MapToArray(ifstream& room_file, ifstream& object_file)
 {
-    char ch;
-    char temp;
-    int counter=0;
+    char room_char, object_char;
     int height_tracker = 0;
     int width_tracker = 0;
-    char td_map [map_height][map_width];
-    while (inputline >> noskipws >> ch)
+    char* td_map = new char[map_height * map_width];
+        
+    while (height_tracker < map_height && room_file >> noskipws >> room_char)
     {
-        if (ch != '\n')
+        if (room_char == '\n')
         {
-            if (height_tracker==map_height-1){counter++;}
-            td_map[height_tracker][width_tracker] = ch;
-                if (width_tracker==map_width-1)
-                {
-                    height_tracker++;
-                    if (height_tracker==map_height)
-                    {
-                        inputline.close();
-                        break;
-                    }
-                    width_tracker = -1;
-                }
-
-            width_tracker++;
+            continue;
         }
+   
+        if (width_tracker == map_width)
+        {
+            height_tracker++;
+            width_tracker = 0;
+        }
+        td_map[height_tracker * map_width + width_tracker] = room_char;
+
+        if (height_tracker == object_height && width_tracker == object_width)
+        {
+            object_file >> noskipws >> object_char;
+            td_map[height_tracker * map_width + width_tracker] = object_char;
+        }
+
+        width_tracker++;
     }
-
-    return *td_map;
-
-    for (int i=0;i<map_height;i++)
+                           
+    for (int i = 0; i < map_height; i++)
     {
-        for (int j=0;j<map_width;j++)
+        for (int j = 0; j < map_width; j++)
         {
-            temp = td_map[i][j];
-            if (j==map_width-1)
-            {
-                cout<<temp;
-                cout<<'\n';
-            }
-            else{
-                cout<<temp;
-            }
+            cout << td_map[i * map_width + j];
         }
+        cout << '\n';
     }
+    return td_map;
 }
-
